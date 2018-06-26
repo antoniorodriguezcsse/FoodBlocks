@@ -13,20 +13,24 @@ public class Main {
 
     public static void main(String[] args) {
 
-        USDA usda = new USDA();
+        USDA usda = new USDA("chicken");
 
+        ArrayList<FoodData> listOfFOods = new ArrayList<>();
+        usda.getFoodObjects();
+/*
         ArrayList<FoodData> listOfFOods = new ArrayList<>();
 
 
         ArrayList<String> idOfFoods = new ArrayList<>();
-        idOfFoods =  usda.getIDsOfFood("beef");
+        idOfFoods =  usda.getIDsOfFood("chicken");
 
 
         for(int i = 0; i < idOfFoods.size();i++)
         {
             System.out.println(idOfFoods.get(i));
             System.out.println(i);
-        }
+        }*/
+
         /*
 
         JSONObject json = null;
