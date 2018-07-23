@@ -25,59 +25,87 @@ public class USDA {
     private ArrayList<FoodData> listOfFoodObjects = new ArrayList<>();
 
 
-    USDA(String nameOfFoodToSearchFor){
-
-         setFoodObjects(nameOfFoodToSearchFor);
-
+    // constructor
+    USDA(String nameOfFoodToSearchFor) {
+        setFoodObjects(nameOfFoodToSearchFor);
     }
 
-    private void setFoodObjects(String nameOfFoodToSearchFor)
-    {
+    public ArrayList<FoodData> getFoodObjects() {
+        return listOfFoodObjects;
+    }
+
+    // Sets the ArrayList(listOfFoodObjects) with foodObjects
+    private void setFoodObjects(String nameOfFoodToSearchFor) {
         idOfFoods = getIDsOfFood(nameOfFoodToSearchFor);
 
-        for(int i = 0; i < idOfFoods.size();i++)
-        {
+        for (int i = 0; i < idOfFoods.size(); i++) {
             FoodData foodData = new FoodData();
-          //  System.out.println(idOfFoods.get(i));
+
             //search for food by ID
-            foodData = searchFoodBasedOnID(idOfFoods.get(i));
+            foodData = setFoodObject(idOfFoods.get(i));
+
+           // System.out.println("Name: " + foodData.getName());
+            listOfFoodObjects.add(foodData);
         }
     }
 
-    public ArrayList<FoodData> getFoodObjects(){
-
-
-        return listOfFoodObjects;
-
-    }
-
-    private FoodData searchFoodBasedOnID(String foodID){
+    // Sets One object for the food data.
+    private FoodData setFoodObject(String foodID) {
         JSONObject json = null;
         try {
-          //  System.out.println("Food id: " +  foodID);
-          //  System.out.println("Code: " +  45188431);
-            json = readJsonFromUrl("https://api.nal.usda.gov/ndb/nutrients/?format=json&api_key=" + "x5qM9v8PkjZrTf2cVSHzoK7y4GsSBgoQEmJsbwqV" + "&nutrients=203&nutrients=205&nutrients=204&nutrients=208&nutrients=269&ndbno=" +  foodID);
 
-            JSONArray jObject = json.getJSONObject("report").getJSONArray("foods");
+            //  System.out.println("Food id: " +  foodID);
+            //  System.out.println("Code: " +  45188431);
+            //  foodID = "45107994";
+            json = readJsonFromUrl("https://api.nal.usda.gov/ndb/nutrients/?format=json&api_key=" + "x5qM9v8PkjZrTf2cVSHzoK7y4GsSBgoQEmJsbwqV" + "&nutrients=203&nutrients=205&nutrients=204&nutrients=208&nutrients=269&ndbno=" + foodID);
+
+            //   JSONArray jObject = json.getJSONObject("report").getJSONArray("foods");
             //System.out.println("hello" + jObject.getJSONObject(0).getJSONArray("nutrients").getJSONObject(4).get("gm"));
             FoodData foodData = new FoodData();
-            foodData.setName((String) jObject.getJSONObject(0).get("name"));
-            foodData.setCaloriesFor100Grams((Double) jObject.getJSONObject(0).getJSONArray("nutrients").getJSONObject(0).get("gm"));
-            foodData.setProteinFor100Grams((Double) jObject.getJSONObject(0).getJSONArray("nutrients").getJSONObject(1).get("gm"));
-            foodData.setCarbohydratesFor100Grams((Double) jObject.getJSONObject(0).getJSONArray("nutrients").getJSONObject(4).get("gm"));
-          //  foodData.setFatsFor100Grams((Double) jObject.getJSONObject(0).getJSONArray("nutrients").getJSONObject(3).get("gm"));
 
-            System.out.println( "blah" + jObject.getJSONObject(0).getJSONArray("nutrients").getJSONObject(3).get("gm"));
-            double blah = Double.valueOf((Double) jObject.getJSONObject(0).getJSONArray("nutrients").getJSONObject(3).get("gm"));
+            JSONObject report = json.getJSONObject("report");
+            JSONArray foods = new JSONArray();
+            foods = report.getJSONArray("foods");
 
+            // System.out.println("name: " + foods.getJSONObject(0).get("name"));
+            foodData.setName("name: " + foods.getJSONObject(0).get("name"));
+          //  System.out.println(foodData.getName());
 
+            JSONArray nutrients = foods.getJSONObject(0).getJSONArray("nutrients");
+            //  System.out.println(nutrients.length());
 
-            System.out.println("Name: " + foodData.getName());
-            System.out.println("Calories per 100g: " + foodData.getCaloriesFor100Grams());
-            System.out.println("Protein per 100g: " + foodData.getProteinFor100Grams());
-            System.out.println("Carbohydrate per 100g: " + foodData.getCarbohydratesFor100Grams());
-            System.out.println("Fat per 100g: " + foodData.getFatsFor100Grams());
+            for (int i = 0; i < nutrients.length(); i++) {
+                // System.out.println(nutrients.getJSONObject(i));
 
+                if (nutrients.getJSONObject(i).get("nutrient").equals("Total lipid (fat)")) {
+                    foodData.setFatsFor100Grams(nutrients.getJSONObject(i).get("gm").toString());
+                    foodData.setFatFor100GramsUnits(nutrients.getJSONObject(i).get("unit").toString());
+                }
+
+                if (nutrients.getJSONObject(i).get("nutrient").equals("Protein")) {
+                    foodData.setProteinFor100Grams(nutrients.getJSONObject(i).get("gm").toString());
+                    foodData.setProteinFor100GramUnits(nutrients.getJSONObject(i).get("unit").toString());
+                }
+
+                if (nutrients.getJSONObject(i).get("nutrient").equals("Carbohydrate, by difference")) {
+                    foodData.setCarbohydratesFor100Grams(nutrients.getJSONObject(i).get("gm").toString());
+                    foodData.setCarbohydratesFor100GramUnits(nutrients.getJSONObject(i).get("unit").toString());
+                }
+
+                if(nutrients.getJSONObject(i).get("nutrient").equals("Energy")){
+                    foodData.setCaloriesFor100Grams(nutrients.getJSONObject(i).get("gm").toString());
+                   // System.out.println("Calorkes: " + nutrients.getJSONObject(i).get("gm").toString() + nutrients.getJSONObject(i).get("unit").toString() );
+                }
+
+            }
+
+          //  System.out.println("report: " + json.getJSONObject("report").get("foods"));
+
+            /*
+            System.out.println("Protein for 100g: " + foodData.getProteinFor100Grams() + foodData.getProteinFor100GramUnits());
+            System.out.println("Carbs for 100g: " + foodData.getCarbohydratesFor100Grams() + foodData.getCarbohydratesFor100GramUnits());
+            System.out.println("Fat for 100g: " + foodData.getFatsFor100Grams() + foodData.getFatFor100GramsUnits());
+*/
             return foodData;
             //     System.out.println(json.getJSONObject("report").get("foods"));
         } catch (IOException e) {
@@ -89,6 +117,7 @@ public class USDA {
 
         return null;
     }
+
     // return ID of All Foods that have the search term in an array. e.g. "beef" is the search term
     private ArrayList<String> getIDsOfFood(String nameOfFood) {
 
@@ -149,7 +178,7 @@ public class USDA {
             if (JSONFoodReportArray.get(i).contains("ndbno")) {
                 String nutritinalDatabaseNumber = JSONFoodReportArray.get(i).replace("\"ndbno\": \"", "");
                 nutritinalDatabaseNumber = nutritinalDatabaseNumber.replace("\",", "");
-                nutritinalDatabaseNumber = nutritinalDatabaseNumber.replaceAll("\\s+","");
+                nutritinalDatabaseNumber = nutritinalDatabaseNumber.replaceAll("\\s+", "");
                 nutritinalDatabaseNumbers.add(nutritinalDatabaseNumber);
             }
         }
